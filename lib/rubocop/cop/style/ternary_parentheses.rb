@@ -158,10 +158,18 @@ module RuboCop
           argument && argument !~ /^\(/
         end
 
+        def_node_matcher :literal, <<-PATTERN
+          ({str dstr int float sym array irange erange hash pair true false} ...)
+        PATTERN
+
         def_node_matcher :method_call_argument, <<-PATTERN
           {(:defined? $...)
-           (send {_ nil?} _ $(send nil? _)...)}
+           (send {_ nil?} _ $(send nil? _)...)
+           (send nil? _ $#literal)}
         PATTERN
+
+        # (send {_ nil?} _ ${int sym float str irange array hash})
+        # (send (send nil _) _ ${int sym float str}...)
 
         def correct_parenthesized(condition)
           lambda do |corrector|

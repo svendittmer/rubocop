@@ -193,6 +193,33 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
       it_behaves_like 'code with offense',
                       'foo = (baz? bar) ? a : b'
 
+      it_behaves_like 'code with offense',
+                      'foo = (baz? 1) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? true) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (bar.baz? 1) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? 1.0) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? :a) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? "a") ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? 1..2) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? [1, 2]) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (baz? a: "b") ? a : b'
+
       context 'when calling method on a receiver' do
         it_behaves_like 'code with offense',
                         'foo = (baz.foo? bar) ? a : b'
