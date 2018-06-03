@@ -63,7 +63,7 @@ module RuboCop
 
           return nil if parenthesized?(condition) &&
                         (safe_assignment?(condition) ||
-                        unsafe_autocorrect?(condition))
+                        unsafe_or_unnecessary_autocorrect?(condition))
 
           if parenthesized?(condition)
             correct_parenthesized(condition)
@@ -147,29 +147,24 @@ module RuboCop
             redundant_parentheses_enabled?
         end
 
-        def unsafe_autocorrect?(condition)
-          condition.children.any? do |child|
-            unparenthesized_method_call?(child)
-          end
+        # if a method call is unparenthesized, autocorrect is unsafe
+        # if it is parenthesized, Style/RedundantParentheses will handle it
+        def unsafe_or_unnecessary_autocorrect?(condition)
+          method_call?(condition) || defined_call?(condition)
         end
 
-        def unparenthesized_method_call?(child)
-          argument = method_call_argument(child)
-          argument && argument !~ /^\(/
+        def method_call?(condition)
+          method, argument = method_and_argument(condition)
+          argument && !operator?(method)
         end
 
-        def_node_matcher :literal, <<-PATTERN
-          ({str dstr int float sym array irange erange hash pair true false} ...)
+        def_node_matcher :method_and_argument, <<-PATTERN
+          (begin (send {_ nil?} $_method $...))
         PATTERN
 
-        def_node_matcher :method_call_argument, <<-PATTERN
-          {(:defined? $...)
-           (send {_ nil?} _ $(send nil? _)...)
-           (send nil? _ $#literal)}
+        def_node_matcher :defined_call?, <<-PATTERN
+          (begin (:defined? ...))
         PATTERN
-
-        # (send {_ nil?} _ ${int sym float str irange array hash})
-        # (send (send nil _) _ ${int sym float str}...)
 
         def correct_parenthesized(condition)
           lambda do |corrector|

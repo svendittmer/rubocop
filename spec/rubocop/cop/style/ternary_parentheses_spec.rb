@@ -137,10 +137,6 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
 
     context 'with a simple condition' do
       it_behaves_like 'code with offense',
-                      'foo = (bar?) ? a : b',
-                      'foo = bar? ? a : b'
-
-      it_behaves_like 'code with offense',
                       'foo = (yield) ? a : b',
                       'foo = yield ? a : b'
 
@@ -155,15 +151,16 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
                       'foo = 1 + 1 == 2 ? a : b'
 
       it_behaves_like 'code with offense',
-                      'foo = (foo1 == foo2) ? a : b'
+                      'foo = (c + d == e) ? a : b',
+                      'foo = c + d == e ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (foo1 == foo2) ? a : b',
+                      'foo = foo1 == foo2 ? a : b'
 
       it_behaves_like 'code with offense',
                       'foo = (bar && baz) ? a : b',
                       'foo = bar && baz ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (bar.baz?) ? a : b',
-                      'foo = bar.baz? ? a : b'
 
       it_behaves_like 'code without offense',
                       'foo = bar && (baz || bar) ? a : b'
@@ -186,6 +183,11 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
       it_behaves_like 'safe assignment disabled', 'require_no_parentheses'
     end
 
+    context 'with a parenthesized method call condition' do
+      it_behaves_like 'code with offense',
+                      'foo = (baz?(bar)) ? a : b'
+    end
+
     context 'with an unparenthesized method call condition' do
       it_behaves_like 'code with offense',
                       'foo = (defined? bar) ? a : b'
@@ -197,59 +199,47 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
                       'foo = (baz? 1) ? a : b'
 
       it_behaves_like 'code with offense',
-                      'foo = (baz? true) ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (bar.baz? 1) ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (baz? 1.0) ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (baz? :a) ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (baz? "a") ? a : b'
-
-      it_behaves_like 'code with offense',
                       'foo = (baz? 1..2) ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (baz? [1, 2]) ? a : b'
-
-      it_behaves_like 'code with offense',
-                      'foo = (baz? a: "b") ? a : b'
 
       context 'when calling method on a receiver' do
         it_behaves_like 'code with offense',
                         'foo = (baz.foo? bar) ? a : b'
+
+        it_behaves_like 'code with offense',
+                        'foo = (bar.baz? 1) ? a : b'
+
+        it_behaves_like 'code with offense',
+                        'foo = (bar.baz? a: "b") ? a : b'
       end
 
       context 'when calling method on a literal receiver' do
         it_behaves_like 'code with offense',
                         'foo = ("bar".foo? bar) ? a : b'
+
+        it_behaves_like 'code with offense',
+                        'foo = ("bar".foo? [1, "a"]) ? a : b'
       end
 
       context 'when calling method on a constant receiver' do
         it_behaves_like 'code with offense',
                         'foo = (Bar.foo? bar) ? a : b'
+
+        it_behaves_like 'code with offense',
+                        'foo = (Bar.foo? :sym) ? a : b'
       end
 
       context 'when calling method with multiple arguments' do
         it_behaves_like 'code with offense',
                         'foo = (baz.foo? bar, baz) ? a : b'
+
+        it_behaves_like 'code with offense',
+                        'foo = (baz.foo? 23, a: 42) ? a : b'
       end
     end
 
     context 'with condition including a range' do
       it_behaves_like 'code without offense',
                       '(foo..bar).include?(baz) ? a : b'
-    end
-
-    context 'with no space between the parentheses and question mark' do
-      it_behaves_like 'code with offense',
-                      '(foo)? a : b',
-                      'foo ? a : b'
     end
   end
 
@@ -264,10 +254,6 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
 
     context 'with a simple condition' do
       it_behaves_like 'code with offense',
-                      'foo = (bar?) ? a : b',
-                      'foo = bar? ? a : b'
-
-      it_behaves_like 'code with offense',
                       'foo = (yield) ? a : b',
                       'foo = yield ? a : b'
 
@@ -277,10 +263,6 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
     end
 
     context 'with a complex condition' do
-      it_behaves_like 'code with offense',
-                      'foo = (bar.baz?) ? a : b',
-                      'foo = bar.baz? ? a : b'
-
       it_behaves_like 'code without offense',
                       'foo = (bar && (baz || bar)) ? a : b'
     end
