@@ -166,6 +166,17 @@ RSpec.describe RuboCop::Cop::Style::TernaryParentheses, :config do
                       'foo = bar && (baz || bar) ? a : b'
     end
 
+    context 'with an operator of lower precedence than the ternary operator' do
+      it_behaves_like 'code with offense',
+                      'foo = (bar and baz) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (bar += baz) ? a : b'
+
+      it_behaves_like 'code with offense',
+                      'foo = (not baz) ? a : b'
+    end
+
     context 'with an assignment condition' do
       it_behaves_like 'code without offense',
                       'foo = (bar = find_bar) ? a : b'

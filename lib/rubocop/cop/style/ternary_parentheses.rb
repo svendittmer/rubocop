@@ -150,10 +150,11 @@ module RuboCop
         # if a method call is unparenthesized, autocorrect is unsafe
         # if it is parenthesized, Style/RedundantParentheses will handle it
         def unsafe_or_unnecessary_autocorrect?(condition)
-          method_call?(condition) || defined_call?(condition)
+          method_call_with_argument?(condition) ||
+            defined_call?(condition)
         end
 
-        def method_call?(condition)
+        def method_call_with_argument?(condition)
           method, argument = method_and_argument(condition)
           argument && !operator?(method)
         end
